@@ -38,23 +38,27 @@ public class JwtAuthencationTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, FilterChain filterChain) throws ServletException, IOException {
+        //通过 request 获取请求头
         String authHeader = httpServletRequest.getHeader(tokenHeader);
-        if(null!=authHeader &&authHeader.startsWith(tokenHead)){
+        //验证头部，不存在，或者不是以tokenHead：Bearer开头的
+        if (authHeader != null && authHeader.startsWith(tokenHead)){
+            //存在，就做一个字符串的截取，其实就是获取了登录的token
             String authToken = authHeader.substring(tokenHead.length());
-            String username = jwtTokenUtil.getUserNameFromToken(authToken);
-            //token存在用户未登录
-            if (null != username && null == SecurityContextHolder.getContext().getAuthentication()) {
-                //登陆
-                UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-                //验证token是否有效
-                if(jwtTokenUtil.validateToken(tokenHead,userDetails)){
-                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails,null, userDetails.getAuthorities());
+            //jwt根据token获取用户名
+            //token存在用户名但是未登录
+            String userName = jwtTokenUtil.getUserNameFromToken(authToken);
+            if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null){
+                //登录
+                UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
+                //判断token是否有效，如果有效把他重新放到用户对象里面
+                if (jwtTokenUtil.validateToken(authToken,userDetails)){
+                    UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }
             }
         }
-
+        //放行
         filterChain.doFilter(httpServletRequest,httpServletResponse);
     }
 }

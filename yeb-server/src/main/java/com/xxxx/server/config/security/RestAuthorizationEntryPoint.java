@@ -27,14 +27,16 @@ public class RestAuthorizationEntryPoint implements AuthenticationEntryPoint {
     public void commence(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, AuthenticationException e) throws IOException, ServletException {
 
         httpServletResponse.setCharacterEncoding("UTF-8");
+        //设置数据格式为json格式
         httpServletResponse.setContentType("application/json");
+        //拿到输出流
         PrintWriter out = httpServletResponse.getWriter();
-        RespBean bean = RespBean.error("未登录，请登录！");
+        //未登录或失效
+        RespBean bean = RespBean.error("未登录或用户信息过期，请重新登录！");
         bean.setCode(401);
         out.write(new ObjectMapper().writeValueAsString(bean));
         out.flush();
         out.close();
-
 
 
     }

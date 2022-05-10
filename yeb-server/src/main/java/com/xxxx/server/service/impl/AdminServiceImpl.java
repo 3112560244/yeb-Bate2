@@ -33,6 +33,7 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
 
     @Autowired
     private AdminMapper adminMapper;
+    
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -58,9 +59,10 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
     public RespBean login(String username, String password,HttpServletRequest request) {
 
         //这个获取的管理员用户有权限字段
-        UserDetails userDetails = userDetailsService.loadUserByUsername(username);
-
-        if(null ==userDetails||passwordEncoder.matches(password,userDetails.getPassword())){
+        UserDetails userDetails = userDetailsService.loadUserByUsername(username);//数据库中存储的密码
+//        passwordEncoder.matches(password,userDetails.getPassword())
+//        密码匹配成功返还true  失败false
+        if(null ==userDetails||!passwordEncoder.matches(password,userDetails.getPassword())){
             return RespBean.error("用户或密码不正确");
         }
         if(!userDetails.isEnabled()){

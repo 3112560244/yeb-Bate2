@@ -41,6 +41,30 @@ public class JwtTokenUtil {
         //根据荷载生成jwt
         return generateToken(jwtToken);
     }
+    /**
+     * 根据荷载生成 JWT TOKEN
+     * @param claims
+     * @return
+     */
+    private String generateToken(Map<String,Object> claims){
+        return Jwts.builder()
+                .setClaims(claims)
+                //失效时间
+                .setExpiration(generateExpirationDate())
+                //签名
+                .signWith(SignatureAlgorithm.HS512, secret)
+                .compact();
+    }
+    /**
+     * 生成token失效时间
+     * @return
+     */
+    private Date generateExpirationDate() {
+        return new Date(System.currentTimeMillis() + expiration * 1000);
+    }
+
+
+
 
     /**
      * 从token中获取登录用户名
@@ -58,7 +82,26 @@ public class JwtTokenUtil {
         }
         return username;
     }
-
+    /**
+     * 从token中获取荷载
+     * @param token
+     * @return
+     */
+    private Claims getClaimsFromToken(String token) {
+        //拿到荷载
+        Claims claims = null ;
+        try {
+            claims = Jwts.parser()
+                    //签名
+                    .setSigningKey(secret)
+                    //密钥
+                    .parseClaimsJws(token)
+                    .getBody();
+        } catch (ExpiredJwtException e) {
+            e.printStackTrace();
+        }
+        return claims;
+    }
     /**
      * 判断token是否有效
      * @param token
@@ -79,19 +122,6 @@ public class JwtTokenUtil {
     public boolean canRefresh(String token){
         return !isTokenExpired(token);
     }
-
-    /**
-     * 刷新token
-     * @param token
-     * @return
-     */
-    public String refreshToken(String token){
-        Claims claims = getClaimsFromToken(token);
-        //将创建时间改成当前时间，就相当于去刷新了
-        claims.put(CLAIM_KEY_CREATED,new Date());
-        return generateToken(claims);
-    }
-
     /**
      * 判断token是否失效
      * @param token
@@ -102,7 +132,6 @@ public class JwtTokenUtil {
         //判断token时间是否是当前时间的前面 .before
         return expireDate.before(new Date());
     }
-
     /**
      * 从token中获取过期时间
      * @param token
@@ -116,48 +145,29 @@ public class JwtTokenUtil {
     }
 
 
+
+
     /**
-     * 从token中获取荷载
+     * 刷新token
      * @param token
      * @return
      */
-    private Claims getClaimsFromToken(String token) {
-        //拿到荷载
-        Claims claims = null ;
-        try {
-            claims = Jwts.parser()
-             //签名
-             .setSigningKey(secret)
-             //密钥
-             .parseClaimsJws(token)
-             .getBody();
-        } catch (ExpiredJwtException e) {
-            e.printStackTrace();
-        }
-        return claims;
+    public String refreshToken(String token){
+        Claims claims = getClaimsFromToken(token);
+        //将创建时间改成当前时间，就相当于去刷新了
+        claims.put(CLAIM_KEY_CREATED,new Date());
+        return generateToken(claims);
     }
 
-    /**
-     * 根据荷载生成 JWT TOKEN
-     * @param claims
-     * @return
-     */
-    private String generateToken(Map<String,Object> claims){
-        return Jwts.builder()
-                .setClaims(claims)
-                //失效时间
-                .setExpiration(generateExpirationDate())
-                //签名
-                .signWith(SignatureAlgorithm.HS512, secret)
-                .compact();
-    }
 
-    /**
-     * 生成token失效时间
-     * @return
-     */
-    private Date generateExpirationDate() {
-        return new Date(System.currentTimeMillis() + expiration * 1000);
-    }
+
+
+
+
+
+
+
+
+
 
 }

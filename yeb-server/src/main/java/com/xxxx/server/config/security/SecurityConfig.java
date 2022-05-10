@@ -66,9 +66,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 .and()
                 .authorizeRequests()
-                //允许登录
-                .antMatchers("/login","/logout","/doc.html")
-                .permitAll()
+//                //允许登录
+//                .antMatchers("/login","/logout","/doc.html")
+//                .permitAll()
                 //除了上面的都不让访问
                 .anyRequest()
                 .authenticated()
@@ -78,9 +78,11 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
         //添加jwt 登录授权过滤器
         http.addFilterBefore(jwtAuthencationTokenFilter(), UsernamePasswordAuthenticationFilter.class);
-        //添加自定义未授权和未登录结果返回
+        //添加自定义 未授权 和 未登录 结果返回
         http.exceptionHandling()
+                //自定义 未授权
                 .accessDeniedHandler(restfulAccessDeniedHandler)
+                //自定义 未登录结果返回
                 .authenticationEntryPoint(restAuthorizationEntryPoint);
 
     }
