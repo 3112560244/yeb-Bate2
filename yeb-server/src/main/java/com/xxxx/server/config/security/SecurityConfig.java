@@ -50,11 +50,13 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 "/js/**",
                 "/index.html",
                 "favicon.ico",
-                //必须放行
+                //swagger2+三方插件必须放行的必须放行
                 "/doc.html",
                 "/webjars/**",
                 "/swagger-resources",
-                "/v2/api-docs/**"
+                "/v2/api-docs/**",
+                //我自己加的测试
+                "/captcha"
         );
 //        云e办
 //                使用第三方swagger图形框架
