@@ -17,21 +17,18 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 /**
- * @Author ZedQ
- * @Date 2022/5/10 15:21
- * @ClassName: JwtAuthencationTokenFilter
- * @Description: TODO
+ * jwt登录授权过滤器
  */
 public class JwtAuthencationTokenFilter extends OncePerRequestFilter {
 
-
-    @Value("${jwt.tokenHeader")
+    @Value("${jwt.tokenHeader}")
     private String tokenHeader;
-    @Value("${jwt.tokenHead")
+
+    @Value("${jwt.tokenHead}")
     private String tokenHead;
 
     @Autowired
-    private JwtTokenUtil jwtTokenUtil;
+    private JwtTokenUtil jwtTokenUtils;
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -46,12 +43,12 @@ public class JwtAuthencationTokenFilter extends OncePerRequestFilter {
             String authToken = authHeader.substring(tokenHead.length());
             //jwt根据token获取用户名
             //token存在用户名但是未登录
-            String userName = jwtTokenUtil.getUserNameFromToken(authToken);
+            String userName = jwtTokenUtils.getUserNameFromToken(authToken);
             if (userName != null && SecurityContextHolder.getContext().getAuthentication() == null){
                 //登录
                 UserDetails userDetails = userDetailsService.loadUserByUsername(userName);
                 //判断token是否有效，如果有效把他重新放到用户对象里面
-                if (jwtTokenUtil.validateToken(authToken,userDetails)){
+                if (jwtTokenUtils.validateToken(authToken,userDetails)){
                     UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(userDetails,null,userDetails.getAuthorities());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(httpServletRequest));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
@@ -61,4 +58,6 @@ public class JwtAuthencationTokenFilter extends OncePerRequestFilter {
         //放行
         filterChain.doFilter(httpServletRequest,httpServletResponse);
     }
+
 }
+
