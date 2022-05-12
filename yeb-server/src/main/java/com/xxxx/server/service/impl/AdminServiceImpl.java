@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.xxxx.server.config.security.JwtTokenUtil;
 import com.xxxx.server.mapper.AdminMapper;
 import com.xxxx.server.pojo.Admin;
+import com.xxxx.server.pojo.Menu;
 import com.xxxx.server.pojo.RespBean;
 import com.xxxx.server.service.IAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,9 +16,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -52,11 +55,18 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
      *
      * @param username
      * @param password
+     * @param code
      * @param request
      * @return
      */
     @Override
-    public RespBean login(String username, String password,HttpServletRequest request) {
+    public RespBean login(String username, String password, String code, HttpServletRequest request) {
+        //获取验证码
+        String defaultKaptcha = (String) request.getSession().getAttribute("captcha");
+        System.out.println("登录验证的验证码：" + code);
+        if (StringUtils.isEmpty(code) || !defaultKaptcha.equalsIgnoreCase(code)) {
+            return RespBean.error("验证码不正确，请重新输入！");
+        }
 
         //这个获取的管理员用户有权限字段
         UserDetails userDetails = userDetailsService.loadUserByUsername(username);//数据库中存储的密码
@@ -97,4 +107,6 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         //使用MybatisPlus的单个查询方法，selectOne 用.eq 比较方法在匹配查询条件
         return adminMapper.selectOne(new QueryWrapper<Admin>().eq("username", username).eq("enabled", true));
     }
+    
+
 }

@@ -51,7 +51,7 @@ public class CaptchaController {
         String text = defaultKaptcha.createText();
         System.out.println("验证码内容:"+text);
         //将验证码内容放入session
-        request.getSession().setAttribute("captcah",text);
+        request.getSession().setAttribute("captcha",text);
 
 
         //生成图形验证码

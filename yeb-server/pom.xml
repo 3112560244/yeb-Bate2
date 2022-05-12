@@ -104,6 +104,7 @@
             <artifactId>commons-pool2</artifactId>
         </dependency>
 
+
         <!--rabbitmq 依赖 又来做邮件发送-->
         <dependency>
             <groupId>org.springframework.boot</groupId>
