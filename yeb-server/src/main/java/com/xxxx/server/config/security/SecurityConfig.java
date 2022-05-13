@@ -1,5 +1,6 @@
 package com.xxxx.server.config.security;
 
+import com.xxxx.server.config.security.component.*;
 import com.xxxx.server.pojo.Admin;
 import com.xxxx.server.service.IAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,8 +12,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.access.intercept.FilterSecurityInterceptor;
@@ -35,6 +36,12 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private RestfulAccessDeniedHandler restfulAccessDeniedHandler;
+
+    @Autowired
+    private CustomFilter customFilter;
+
+    @Autowired
+    private CustomUrlDecisionManager customUrlDecisionManager;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception {
@@ -90,6 +97,15 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 //所有请求都要求认证
                 .anyRequest()
                 .authenticated()
+                //动态权限，获取不同菜单列表
+                .withObjectPostProcessor(new ObjectPostProcessor<FilterSecurityInterceptor>() {
+                    @Override
+                    public <O extends FilterSecurityInterceptor> O postProcess(O o) {
+                        o.setAccessDecisionManager(customUrlDecisionManager);
+                        o.setSecurityMetadataSource(customFilter);
+                        return o;
+                    }
+                })
                 .and()
                 //禁用缓存
                 .headers()
@@ -106,17 +122,17 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
     }
 
-    @Override
+    @Override//重写获取用户的方法
     @Bean
     public UserDetailsService userDetailsService(){
-        return username->{
+        return username -> {
             Admin admin = adminService.getAdminByUserName(username);
-            if(null!=admin){
+            if (admin != null){
+                admin.setRoles(adminService.getRoles(admin.getId()));
                 return admin;
             }
-            return null;
+            throw new UsernameNotFoundException("用户名或密码不正确！");
         };
-
     }
 
     @Bean

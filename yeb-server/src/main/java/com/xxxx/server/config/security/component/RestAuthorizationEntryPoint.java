@@ -1,4 +1,4 @@
-package com.xxxx.server.config.security;
+package com.xxxx.server.config.security.component;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.xxxx.server.pojo.RespBean;

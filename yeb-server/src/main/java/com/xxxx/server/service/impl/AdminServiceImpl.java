@@ -2,11 +2,12 @@ package com.xxxx.server.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
-import com.xxxx.server.config.security.JwtTokenUtil;
+import com.xxxx.server.config.security.component.JwtTokenUtil;
 import com.xxxx.server.mapper.AdminMapper;
+import com.xxxx.server.mapper.RoleMapper;
 import com.xxxx.server.pojo.Admin;
-import com.xxxx.server.pojo.Menu;
 import com.xxxx.server.pojo.RespBean;
+import com.xxxx.server.pojo.Role;
 import com.xxxx.server.service.IAdminService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,7 +37,9 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
 
     @Autowired
     private AdminMapper adminMapper;
-    
+    @Autowired
+    private RoleMapper roleMapper;
+
 
     @Autowired
     private UserDetailsService userDetailsService;
@@ -107,6 +110,18 @@ public class AdminServiceImpl extends ServiceImpl<AdminMapper, Admin> implements
         //使用MybatisPlus的单个查询方法，selectOne 用.eq 比较方法在匹配查询条件
         return adminMapper.selectOne(new QueryWrapper<Admin>().eq("username", username).eq("enabled", true));
     }
-    
+
+    /**
+     * 根据用户id查询角色列表
+     *
+     * @param adminId
+     * @return
+     */
+    @Override
+    public List<Role> getRoles(Integer adminId) {
+
+        return roleMapper.getRoles(adminId);
+    }
+
 
 }

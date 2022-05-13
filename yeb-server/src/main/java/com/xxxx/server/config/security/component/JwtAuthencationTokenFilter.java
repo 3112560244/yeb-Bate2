@@ -1,6 +1,5 @@
-package com.xxxx.server.config.security;
+package com.xxxx.server.config.security.component;
 
-import jdk.nashorn.internal.ir.RuntimeNode;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
