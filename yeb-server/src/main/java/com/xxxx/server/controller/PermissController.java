@@ -1,15 +1,22 @@
 package com.xxxx.server.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.xxxx.server.pojo.Menu;
+import com.xxxx.server.pojo.MenuRole;
 import com.xxxx.server.pojo.RespBean;
 import com.xxxx.server.pojo.Role;
+import com.xxxx.server.service.impl.MenuRoleServiceImpl;
+import com.xxxx.server.service.impl.MenuServiceImpl;
 import com.xxxx.server.service.impl.RoleServiceImpl;
 import io.swagger.annotations.ApiOperation;
+import io.swagger.models.auth.In;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @Author: ZedQ
@@ -22,6 +29,12 @@ public class PermissController {
 
     @Autowired
     private RoleServiceImpl roleService;
+
+    @Autowired
+    private MenuServiceImpl menuService;
+
+    @Autowired
+    private MenuRoleServiceImpl menuRoleService;
 
     @ApiOperation(value = "获取所有角色")
     @GetMapping("/")
@@ -70,6 +83,19 @@ public class PermissController {
             return RespBean.success("批量删除成功");
         }
         return  RespBean.error("批量删除失败");
+    }
+
+
+    @ApiOperation(value = "查询所有菜单")
+    @GetMapping("/menus")
+    public List<Role> getAllMenus(){
+        return menuService.getAllMenus();
+    }
+
+    @ApiOperation(value = "根据角色id查询菜单")
+    @GetMapping("/mid/{rid}")
+    public List<Integer> getMidRid(@PathVariable Integer rid){
+        return menuRoleService.list(new QueryWrapper<MenuRole>().eq("rid",rid)).stream().map(MenuRole::getMid).collect(Collectors.toList());
     }
 
 }
